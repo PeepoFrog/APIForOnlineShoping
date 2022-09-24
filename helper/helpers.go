@@ -12,7 +12,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-const connectionString = "mongodb+srv://test:1qa2ws3ed@cluster0.tkurad8.mongodb.net/?retryWrites=true&w=majority"
+const connectionString = "mongodb+srv://test:QGAiem4vrDzeESs@cluster0.tkurad8.mongodb.net/?retryWrites=true&w=majority"
 const dbName = "shop"
 const collectionName = "goods"
 const userdbName = "users"
