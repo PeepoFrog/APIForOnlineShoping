@@ -11,6 +11,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
+// gittest
 func CreateUnregUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/x-www-form-urlencode")
 	w.Header().Set("Allow-Control-Allow-Methods", "POST")
