@@ -97,7 +97,7 @@ func GetAllUsers() []primitive.M {
 	var users []primitive.M
 	for cursor.Next(context.Background()) {
 		var user bson.M
-		fmt.Println(user)
+
 		err := cursor.Decode(&user)
 		if err != nil {
 			log.Fatal(err)
@@ -107,32 +107,34 @@ func GetAllUsers() []primitive.M {
 	defer cursor.Close(context.Background())
 	return users
 }
-func GetOneUser(UserID string) (bson.M, []primitive.M) {
+func GetOneUser(UserID string) bson.M {
 	id, err := primitive.ObjectIDFromHex(UserID)
 	if err != nil {
+		fmt.Println(err)
 		log.Fatal(err)
 	}
 	filter := bson.M{"_id": id}
 	cursor, err := userCollection.Find(context.Background(), filter)
 	if err != nil {
+		fmt.Println(err, "cursos:", cursor)
 		log.Fatal(err)
 	}
-	var users []primitive.M
+
 	var ruser bson.M
 	for cursor.Next(context.Background()) {
 		var user bson.M
-
 		err := cursor.Decode(&user)
 		if err != nil {
 			log.Fatal(err)
 		}
 		ruser = user
-		users = append(users, user)
+		fmt.Println(user)
+
 	}
 
 	defer cursor.Close(context.Background())
 	//returning regular user and usen in []primitive array
-	return ruser, users
+	return ruser
 }
 func AddCommodityToUserBasket(UserID string, CommodityID string) {
 	// params := mux.Vars(r)

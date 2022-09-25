@@ -2,7 +2,6 @@ package controller
 
 import (
 	"encoding/json"
-	"fmt"
 	"internetshop/helper"
 	"internetshop/model"
 	"net/http"
@@ -31,8 +30,12 @@ func GetAllUsers(w http.ResponseWriter, r *http.Request) {
 func GetOneUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/x-www-form-urlencode")
 	params := mux.Vars(r)
-	searchedUser, searchedUserInarray := helper.GetOneUser(params["id"])
-	fmt.Println(searchedUserInarray)
+	searchedUser := helper.GetOneUser(params["id"])
+	if searchedUser == nil {
+		json.NewEncoder(w).Encode("No user with id: " + params["id"])
+		return
+	}
+
 	//json.NewEncoder(w).Encode(searchedUserInarray)
 	json.NewEncoder(w).Encode(searchedUser)
 
