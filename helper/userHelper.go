@@ -102,6 +102,7 @@ func GetAllUsers() []primitive.M {
 		if err != nil {
 			log.Fatal(err)
 		}
+		fmt.Println()
 		users = append(users, user)
 	}
 	defer cursor.Close(context.Background())
