@@ -6,7 +6,7 @@ import (
 
 	"github.com/gorilla/mux"
 )
-handlers
+handler.Controller
 func Router() *mux.Router {
 	//
 	//

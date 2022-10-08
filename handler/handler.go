@@ -13,7 +13,7 @@ type Postgre struct {
 type Controller interface {
 	CreateUnregUser()
 }
-
+handler
 func (m Mongo) CreateUnregUser(w http.ResponseWriter, r *http.Request) {
 	controller.CreateUnregUser(w, r)
 
