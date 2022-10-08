@@ -10,12 +10,28 @@ import (
 	"github.com/gorilla/mux"
 )
 
+type UserController struct {
+	repository helper.UserRepository
+}
+
+func NewUserRepository(repository helper.UserRepository) *UserController {
+	return &UserController{repository: repository}
+}
+
+func (c *UserController) AddUser(w http.ResponseWriter, r *http.Request) {
+	var user model.UnregUser
+
+	_ = json.NewDecoder(r.Body).Decode(&user) //check what instade of this var
+	c.repository.AddUser(user)
+}
+
 // gittest
 func CreateUnregUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/x-www-form-urlencode")
 	w.Header().Set("Allow-Control-Allow-Methods", "POST")
 	var user model.UnregUser
 	_ = json.NewDecoder(r.Body).Decode(&user) //check what instade of this var
+
 	u := helper.CreateUserInDB(user)
 	// var s string = user.ID + user.Basket
 	json.NewEncoder(w).Encode(u)

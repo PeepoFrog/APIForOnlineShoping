@@ -18,9 +18,6 @@ const usercollectionName = "unregistredUsers"
 var collection *mongo.Collection
 var userCollection *mongo.Collection
 
-type UserHelper struct {
-}
-
 func init() {
 	//client options for all databases
 	clientOptions := options.Client().ApplyURI(connectionString)

@@ -48,6 +48,29 @@ func GetSetCoockies(w http.ResponseWriter, r *http.Request) {
 
 }
 
+type Mongo struct {
+}
+
+func NewMongo() *Mongo {
+	return &Mongo{}
+}
+
+type Postgre struct{}
+
+func NewPostgre() *Postgre {
+	return &Postgre{}
+}
+
+type UserRepository interface {
+	AddUser(user model.UnregUser)
+}
+
+func (m *Mongo) AddUser(user model.UnregUser) {
+
+}
+func (p *Postgre) AddUser(user model.UnregUser) {
+
+}
 func CreateUserInDB(user model.UnregUser) *mongo.InsertOneResult {
 	insertedUser, err := userCollection.InsertOne(context.Background(), user)
 	if err != nil {
@@ -56,6 +79,7 @@ func CreateUserInDB(user model.UnregUser) *mongo.InsertOneResult {
 	fmt.Println("User with id ", insertedUser.InsertedID, " was added")
 	return insertedUser
 }
+
 func CreateUnregUserInDB() *mongo.InsertOneResult {
 	var user model.UnregUser
 	insertedUser, err := userCollection.InsertOne(context.Background(), user)
