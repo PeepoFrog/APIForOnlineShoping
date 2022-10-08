@@ -16,9 +16,6 @@ import (
 
 //var basket []primitive.M
 
-func init() {
-
-}
 func SetCookie(w http.ResponseWriter, r *http.Request) *http.Cookie {
 	expiration := time.Now().Add(365 * 24 * time.Hour)
 	user := CreateUnregUserInDB()
