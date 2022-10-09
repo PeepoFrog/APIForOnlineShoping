@@ -11,18 +11,22 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func init() {
-
+type CommodityController struct {
+	repository helper.CommodityRepository
 }
-func CreateCommodity(w http.ResponseWriter, r *http.Request) {
+
+func NewCommodityRepository(repository helper.CommodityRepository) *CommodityController {
+	return &CommodityController{repository: repository}
+}
+func (c *CommodityController) CreateCommodity(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/x-www-form-urlencode")
 	w.Header().Set("Allow-Control-Allow-Methods", "POST")
 	var commodity model.Commodity
 	_ = json.NewDecoder(r.Body).Decode(&commodity) //check what instade of this var
-	helper.InsertComodity(commodity)
+	c.repository.InsertComodity(commodity)
 	json.NewEncoder(w).Encode(&commodity)
 }
-func SetPrice(w http.ResponseWriter, r *http.Request) {
+func (c *CommodityController) SetPrice(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/x-www-form-urlencode")
 	w.Header().Set("Allow-Control-Allow-Methods", "PUT")
 	params := mux.Vars(r)
@@ -30,11 +34,11 @@ func SetPrice(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Panic(err)
 	}
-	helper.SetPrice(params["id"], newP)
+	c.repository.SetPrice(params["id"], newP)
 	json.NewEncoder(w).Encode(params["id"])
 
 }
-func SetQuantity(w http.ResponseWriter, r *http.Request) {
+func (c *CommodityController) SetQuantity(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/x-www-form-urlencode")
 	w.Header().Set("Allow-Control-Allow-Methods", "PUT")
 	params := mux.Vars(r)
@@ -42,37 +46,37 @@ func SetQuantity(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Panic(err)
 	}
-	helper.SetQuantity(params["id"], newP)
+	c.repository.SetQuantity(params["id"], newP)
 	json.NewEncoder(w).Encode(params["id"] + params["price"])
 
 }
 
-func DeleteOneCommodity(w http.ResponseWriter, r *http.Request) {
+func (c *CommodityController) DeleteOneCommodity(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/x-www-form-urlencode")
 	w.Header().Set("Allow-Control-Allow-Methods", "DELETE")
 	params := mux.Vars(r)
-	helper.DeleteOneCommodity(params["id"])
+	c.repository.DeleteOneCommodity(params["id"])
 	json.NewEncoder(w).Encode("Commodity with id :" + params["id"] + " was deleted")
 
 }
-func DeleteALlCommodities(w http.ResponseWriter, r *http.Request) {
+func (c *CommodityController) DeleteALlCommodities(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/x-www-form-urlencode")
 	w.Header().Set("Allow-Control-Allow-Methods", "DELETE")
-	count := helper.DeleteALlCommodities()
+	count := c.repository.DeleteALlCommodities()
 	json.NewEncoder(w).Encode(strconv.Itoa(int(count)) + "goods was deleted")
 
 }
 
-func GetAllCommodities(w http.ResponseWriter, r *http.Request) {
+func (c *CommodityController) GetAllCommodities(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/x-www-form-urlencode")
-	allMovies := helper.GetAllCommodities()
+	allMovies := c.repository.GetAllCommodities()
 	json.NewEncoder(w).Encode(allMovies)
 
 }
-func GetOneCommodity(w http.ResponseWriter, r *http.Request) {
+func (c *CommodityController) GetOneCommodity(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/x-www-form-urlencode")
 	params := mux.Vars(r)
-	searched, _ := helper.GetOneCommodity(params["id"])
+	searched, _ := c.repository.GetOneCommodity(params["id"])
 	json.NewEncoder(w).Encode(searched)
 
 }

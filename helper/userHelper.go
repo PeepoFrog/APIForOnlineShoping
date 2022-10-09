@@ -14,19 +14,6 @@ import (
 
 //var basket []primitive.M
 
-type Mongo struct {
-}
-
-func NewMongo() *Mongo {
-	return &Mongo{}
-}
-
-type Postgre struct{}
-
-func NewPostgre() *Postgre {
-	return &Postgre{}
-}
-
 type UserRepository interface {
 	AddUser(user model.UnregUser)
 	CreateUserInDB(user model.UnregUser) *mongo.InsertOneResult

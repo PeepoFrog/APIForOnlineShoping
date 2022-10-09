@@ -18,6 +18,18 @@ const usercollectionName = "unregistredUsers"
 var collection *mongo.Collection
 var userCollection *mongo.Collection
 
+type Mongo struct {
+}
+
+func NewMongo() *Mongo {
+	return &Mongo{}
+}
+
+type Postgre struct{}
+
+func NewPostgre() *Postgre {
+	return &Postgre{}
+}
 func init() {
 	//client options for all databases
 	clientOptions := options.Client().ApplyURI(connectionString)

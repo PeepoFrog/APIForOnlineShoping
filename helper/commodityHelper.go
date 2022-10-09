@@ -10,14 +10,24 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func InsertComodity(commodity model.Commodity) {
+type CommodityRepository interface {
+	InsertComodity(commodity model.Commodity)
+	SetPrice(commodityID string, newPrice float64)
+	SetQuantity(commodityID string, newQuantity int)
+	DeleteOneCommodity(comodityID string)
+	DeleteALlCommodities() int64
+	GetAllCommodities() []primitive.M
+	GetOneCommodity(comodityID string) (bson.M, []primitive.M)
+}
+
+func (m *Mongo) InsertComodity(commodity model.Commodity) {
 	inserted, err := collection.InsertOne(context.Background(), &commodity)
 	if err != nil {
 		log.Fatal(err)
 	}
 	fmt.Println("Comidity with id ", inserted.InsertedID, " was added")
 }
-func SetPrice(commodityID string, newPrice float64) {
+func (m *Mongo) SetPrice(commodityID string, newPrice float64) {
 	id, err := primitive.ObjectIDFromHex(commodityID)
 	if err != nil {
 		log.Fatal(err)
@@ -27,7 +37,7 @@ func SetPrice(commodityID string, newPrice float64) {
 	//check for future
 	collection.UpdateOne(context.Background(), filter, update)
 }
-func SetQuantity(commodityID string, newQuantity int) {
+func (m *Mongo) SetQuantity(commodityID string, newQuantity int) {
 	id, err := primitive.ObjectIDFromHex(commodityID)
 	if err != nil {
 		log.Fatal(err)
@@ -40,7 +50,7 @@ func SetQuantity(commodityID string, newQuantity int) {
 	}
 	fmt.Println(result.UpsertedID, " Check for future this too") //check what UpsertedID is do
 }
-func DeleteOneCommodity(comodityID string) {
+func (m *Mongo) DeleteOneCommodity(comodityID string) {
 	id, err := primitive.ObjectIDFromHex(comodityID)
 	if err != nil {
 		log.Fatal(err)
@@ -52,7 +62,7 @@ func DeleteOneCommodity(comodityID string) {
 	}
 	fmt.Println("how many items was deleted: ", deleteResult.DeletedCount)
 }
-func DeleteALlCommodities() int64 {
+func (m *Mongo) DeleteALlCommodities() int64 {
 	filter := bson.D{{}}
 	deleteResult, err := collection.DeleteMany(context.Background(), filter, nil) //test DeleteOne and DeleteMany and what gonna happend if i remove nil
 	if err != nil {
@@ -62,7 +72,7 @@ func DeleteALlCommodities() int64 {
 	fmt.Println("Number of commodities was deleted ", deleteResult.DeletedCount)
 	return deleteResult.DeletedCount
 }
-func GetAllCommodities() []primitive.M {
+func (m *Mongo) GetAllCommodities() []primitive.M {
 	cursor, err := collection.Find(context.Background(), bson.D{{}})
 	if err != nil {
 		log.Fatal(err)
@@ -82,7 +92,7 @@ func GetAllCommodities() []primitive.M {
 
 	return commodities
 }
-func GetOneCommodity(comodityID string) (bson.M, []primitive.M) {
+func (m *Mongo) GetOneCommodity(comodityID string) (bson.M, []primitive.M) {
 	id, err := primitive.ObjectIDFromHex(comodityID)
 	if err != nil {
 		log.Fatal(err)
