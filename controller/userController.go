@@ -2,12 +2,15 @@ package controller
 
 import (
 	"encoding/json"
+	"fmt"
 	"internetshop/helper"
 	"internetshop/model"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gorilla/mux"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type UserController struct {
@@ -26,60 +29,98 @@ func (c *UserController) AddUser(w http.ResponseWriter, r *http.Request) {
 }
 
 // gittest
-func CreateUnregUser(w http.ResponseWriter, r *http.Request) {
+func (c *UserController) CreateUnregUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/x-www-form-urlencode")
 	w.Header().Set("Allow-Control-Allow-Methods", "POST")
 	var user model.UnregUser
 	_ = json.NewDecoder(r.Body).Decode(&user) //check what instade of this var
 
-	u := helper.CreateUserInDB(user)
+	//u := helper.CreateUserInDB(user)
+	u := c.repository.CreateUserInDB(user)
 	// var s string = user.ID + user.Basket
 	json.NewEncoder(w).Encode(u)
 
 }
-func GetAllUsers(w http.ResponseWriter, r *http.Request) {
+func (c *UserController) GetAllUsers(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/x-www-form-urlencode")
-	users := helper.GetAllUsers()
+	//users := helper.GetAllUsers()
+	users := c.repository.GetAllUsers()
 	json.NewEncoder(w).Encode(users)
 
 }
-func GetOneUser(w http.ResponseWriter, r *http.Request) {
+func (c *UserController) GetOneUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/x-www-form-urlencode")
 	params := mux.Vars(r)
-	searchedUser := helper.GetOneUser(params["id"])
+	//searchedUser := helper.GetOneUser(params["id"])
+	searchedUser := c.repository.GetOneUser(params["id"])
 	if searchedUser == nil {
 		json.NewEncoder(w).Encode("No user with id: " + params["id"])
 		return
 	}
-
 	//json.NewEncoder(w).Encode(searchedUserInarray)
 	json.NewEncoder(w).Encode(searchedUser)
 
 }
-func DeleteOneUser(w http.ResponseWriter, r *http.Request) {
+func (c *UserController) DeleteOneUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/x-www-form-urlencode")
 	w.Header().Set("Allow-Control-Allow-Methods", "DELETE")
 	params := mux.Vars(r)
-	helper.DeleteOneUser(params["id"])
+	//helper.DeleteOneUser(params["id"])
+	c.repository.DeleteOneUser(params["id"])
 	json.NewEncoder(w).Encode("User with id :" + params["id"] + " was deleted")
 
 }
-func DeleteALlUsers(w http.ResponseWriter, r *http.Request) {
+func (c *UserController) DeleteALlUsers(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/x-www-form-urlencode")
 	w.Header().Set("Allow-Control-Allow-Methods", "DELETE")
-	count := helper.DeleteALlUsers()
+	//count := helper.DeleteALlUsers()
+	count := c.repository.DeleteALlUsers()
 	json.NewEncoder(w).Encode(strconv.Itoa(int(count)) + "users was deleted")
 }
 
-func AddCommodityToUserBasket(w http.ResponseWriter, r *http.Request) {
+func (c *UserController) AddCommodityToUserBasket(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/x-www-form-urlencode")
 	w.Header().Set("Allow-Control-Allow-Methods", "PUT")
 	params := mux.Vars(r)
-	//fmt.Println()
-	helper.AddCommodityToUserBasket(params["id"], params["commodity"])
+	//helper.AddCommodityToUserBasket(params["id"], params["commodity"])
+	c.repository.AddCommodityToUserBasket(params["id"], params["commodity"])
 }
-func GetSetCoockies(w http.ResponseWriter, r *http.Request) {
+
+func (c *UserController) SetCookie(w http.ResponseWriter, r *http.Request) *http.Cookie {
+	expiration := time.Now().Add(365 * 24 * time.Hour)
+
+	//user := CreateUnregUserInDB()
+	// user := UserRepository.CreateUnregUserInDB(NewMongo())
+	user := c.repository.CreateUnregUserInDB()
+	id := user.InsertedID.(primitive.ObjectID).String()
+	fmt.Println(id)
+	cookie := http.Cookie{Name: "id", Value: id, Expires: expiration}
+	http.SetCookie(w, &cookie)
+	return &cookie
+}
+
+func (c *UserController) GetCoockie(w http.ResponseWriter, r *http.Request) (*http.Cookie, bool) {
+	cookieid, _ := r.Cookie("id")
+	if cookieid == nil {
+		fmt.Println("cookie is nil")
+		return cookieid, false
+	} else {
+		return cookieid, true
+	}
+
+}
+func (c *UserController) GetSetCoockies(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/x-www-form-urlencode")
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	helper.GetSetCoockies(w, r)
+	// rcookie := r.Cookies()
+	//cookie, check := GetCoockie(w, r)
+	cookie, check := c.GetCoockie(w, r)
+
+	fmt.Println(cookie, check)
+	if !check {
+		a := c.SetCookie(w, r)
+		fmt.Println(a)
+		//fmt.Println(c)cookie
+	}
+
 }
