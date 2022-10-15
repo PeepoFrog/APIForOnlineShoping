@@ -2,7 +2,7 @@ package controller
 
 import (
 	"encoding/json"
-	helper "internetshop/helper/MongoDB"
+	helper "internetshop/helper"
 	"internetshop/model"
 	"log"
 	"net/http"
