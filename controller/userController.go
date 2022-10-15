@@ -3,7 +3,7 @@ package controller
 import (
 	"encoding/json"
 	"fmt"
-	"internetshop/helper"
+	helper "internetshop/helper"
 	"internetshop/model"
 	"net/http"
 	"strconv"
