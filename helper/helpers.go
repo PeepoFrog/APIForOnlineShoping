@@ -13,7 +13,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-const connectionString = "mongodb+srv://test:QGAiem4vrDzeESs@cluster0.tkurad8.mongodb.net/?retryWrites=true&w=majority"
 const dbName = "shop"
 const collectionName = "goods"
 const userdbName = "users"
@@ -39,8 +38,12 @@ func NewPostgre() *Postgre {
 
 }
 func init() {
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Fatalf("Error loading .env file")
+	}
 	//client options for all databases
-	clientOptions := options.Client().ApplyURI(connectionString)
+	clientOptions := options.Client().ApplyURI(os.Getenv("MONGO_URL"))
 	//connect to mongoDB
 	client, err := mongo.Connect(context.TODO(), clientOptions)
 

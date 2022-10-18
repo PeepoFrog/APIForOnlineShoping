@@ -14,10 +14,10 @@ func Router() *mux.Router {
 	_ = mongo
 	postgres := helper.NewPostgre()
 
-	mongoUserController := controller.NewUserRepository(mongo)
+	userController := controller.NewUserRepository(mongo)
 	commodityController := controller.NewCommodityRepository(mongo)
 	postgreCommodityComtroller := controller.NewCommodityRepository(postgres)
-	router.HandleFunc("/api/usertest", mongoUserController.AddUser).Methods("POST")
+	router.HandleFunc("/api/usertest", userController.AddUser).Methods("POST")
 
 	//
 	//
@@ -32,7 +32,7 @@ func Router() *mux.Router {
 	//
 	//
 	// testing
-	router.HandleFunc("/test/cookie", mongoUserController.GetSetCoockies).Methods("GET")
+	router.HandleFunc("/test/cookie", userController.GetSetCoockies).Methods("GET")
 	router.HandleFunc("/test/{userID}&{itemID}", helper.Testing).Methods("GET")
 	router.HandleFunc("/test", postgreCommodityComtroller.GetAllCommodities).Methods("GET")
 	router.HandleFunc("/test{id}&{price}", postgreCommodityComtroller.GetAllCommodities).Methods("GET")
@@ -40,12 +40,12 @@ func Router() *mux.Router {
 	//
 	//
 	// users routers
-	router.HandleFunc("/api/user", mongoUserController.CreateUnregUser).Methods("POST")
-	router.HandleFunc("/api/user", mongoUserController.GetAllUsers).Methods("GET")
-	router.HandleFunc("/api/user/{id}", mongoUserController.GetOneUser).Methods("GET")
-	router.HandleFunc("/api/user/{id}", mongoUserController.DeleteOneUser).Methods("DELETE")
-	router.HandleFunc("/api/user", mongoUserController.DeleteALlUsers).Methods("DELETE")
-	router.HandleFunc("/api/user/{id}&{commodity}", mongoUserController.AddCommodityToUserBasket).Methods("PUT")
+	router.HandleFunc("/api/user", userController.CreateUnregUser).Methods("POST")
+	router.HandleFunc("/api/user", userController.GetAllUsers).Methods("GET")
+	router.HandleFunc("/api/user/{id}", userController.GetOneUser).Methods("GET")
+	router.HandleFunc("/api/user/{id}", userController.DeleteOneUser).Methods("DELETE")
+	router.HandleFunc("/api/user", userController.DeleteALlUsers).Methods("DELETE")
+	router.HandleFunc("/api/user/{id}&{commodity}", userController.AddCommodityToUserBasket).Methods("PUT")
 	//
 	return router
 
