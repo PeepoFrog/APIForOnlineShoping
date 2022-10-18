@@ -7,33 +7,36 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func init() {
-
-}
 func Router() *mux.Router {
+
 	router := mux.NewRouter()
 	mongo := helper.NewMongo()
 	_ = mongo
 	postgres := helper.NewPostgre()
-	_ = postgres
+
 	mongoUserController := controller.NewUserRepository(mongo)
-	mongoCommodityController := controller.NewCommodityRepository(mongo)
+	commodityController := controller.NewCommodityRepository(mongo)
+	postgreCommodityComtroller := controller.NewCommodityRepository(postgres)
 	router.HandleFunc("/api/usertest", mongoUserController.AddUser).Methods("POST")
+
 	//
 	//
 	// commodities routers
-	router.HandleFunc("/api/commodity", mongoCommodityController.GetAllCommodities).Methods("GET")
-	router.HandleFunc("/api/commodity/{id}", mongoCommodityController.GetOneCommodity).Methods("GET")
-	router.HandleFunc("/api/commodity", mongoCommodityController.CreateCommodity).Methods("POST")
-	router.HandleFunc("/api/commodity/{id}&{price}", mongoCommodityController.SetPrice).Methods("PUT")
-	router.HandleFunc("/api/commodity/{id}&{quantity}", mongoCommodityController.SetQuantity).Methods("PUT")
-	router.HandleFunc("/api/commodity/{id}", mongoCommodityController.DeleteOneCommodity).Methods("DELETE")
-	router.HandleFunc("/api/commodity", mongoCommodityController.DeleteALlCommodities).Methods("DELETE")
+	router.HandleFunc("/api/commodity", commodityController.GetAllCommodities).Methods("GET")
+	router.HandleFunc("/api/commodity/{id}", commodityController.GetOneCommodity).Methods("GET")
+	router.HandleFunc("/api/commodity", commodityController.CreateCommodity).Methods("POST")
+	router.HandleFunc("/api/commodity/price/{id}&{price}", commodityController.SetPrice).Methods("PUT")
+	router.HandleFunc("/api/commodity/quantity/{id}&{quantity}", commodityController.SetQuantity).Methods("PUT")
+	router.HandleFunc("/api/commodity/{id}", commodityController.DeleteOneCommodity).Methods("DELETE")
+	router.HandleFunc("/api/commodity", commodityController.DeleteALlCommodities).Methods("DELETE")
 	//
 	//
 	// testing
-	router.HandleFunc("/api/coockie", mongoUserController.GetSetCoockies).Methods("GET")
-	router.HandleFunc("/api/user/testing/{userID}&{itemID}", helper.Testing).Methods("GET")
+	router.HandleFunc("/test/cookie", mongoUserController.GetSetCoockies).Methods("GET")
+	router.HandleFunc("/test/{userID}&{itemID}", helper.Testing).Methods("GET")
+	router.HandleFunc("/test", postgreCommodityComtroller.GetAllCommodities).Methods("GET")
+	router.HandleFunc("/test{id}&{price}", postgreCommodityComtroller.GetAllCommodities).Methods("GET")
+
 	//
 	//
 	// users routers

@@ -42,12 +42,12 @@ func (c *CommodityController) SetQuantity(w http.ResponseWriter, r *http.Request
 	w.Header().Set("Content-Type", "application/x-www-form-urlencode")
 	w.Header().Set("Allow-Control-Allow-Methods", "PUT")
 	params := mux.Vars(r)
-	newP, err := strconv.Atoi(params["price"])
+	newP, err := strconv.Atoi(params["quantity"])
 	if err != nil {
 		log.Panic(err)
 	}
 	c.repository.SetQuantity(params["id"], newP)
-	json.NewEncoder(w).Encode(params["id"] + params["price"])
+	json.NewEncoder(w).Encode(params["id"] + params["quantity"])
 
 }
 
@@ -69,8 +69,8 @@ func (c *CommodityController) DeleteALlCommodities(w http.ResponseWriter, r *htt
 
 func (c *CommodityController) GetAllCommodities(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/x-www-form-urlencode")
-	allMovies := c.repository.GetAllCommodities()
-	json.NewEncoder(w).Encode(allMovies)
+	commodities, _ := c.repository.GetAllCommodities()
+	json.NewEncoder(w).Encode(commodities)
 
 }
 func (c *CommodityController) GetOneCommodity(w http.ResponseWriter, r *http.Request) {
