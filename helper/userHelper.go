@@ -18,7 +18,7 @@ type UserRepository interface {
 	CreateUnregUserInDB() string
 	DeleteOneUser(userID string)
 	DeleteALlUsers() int64
-	GetAllUsers() []model.UnregUser
+	GetAllUsers() ([]model.UnregUser, error)
 	GetOneUser(UserID string) (model.UnregUser, error)
 	AddCommodityToUserBasket(UserID string, CommodityID string)
 }
@@ -65,7 +65,7 @@ func (m *Mongo) DeleteALlUsers() int64 {
 	fmt.Println("Number of users was deleted ", deleteResult.DeletedCount)
 	return deleteResult.DeletedCount
 }
-func (m *Mongo) GetAllUsers() []model.UnregUser {
+func (m *Mongo) GetAllUsers() ([]model.UnregUser, error) {
 	cursor, err := userCollection.Find(context.Background(), bson.D{{}})
 	if err != nil {
 		log.Fatal(err)
@@ -85,7 +85,7 @@ func (m *Mongo) GetAllUsers() []model.UnregUser {
 		users = append(users, user)
 	}
 	defer cursor.Close(context.Background())
-	return modelUsers
+	return modelUsers, err
 }
 func (m *Mongo) GetOneUser(UserID string) (model.UnregUser, error) {
 	id, err := primitive.ObjectIDFromHex(UserID)
@@ -143,7 +143,7 @@ func (m *Mongo) AddCommodityToUserBasket(UserID string, CommodityID string) {
 }
 
 // --- P O S T G R E---DB ---
-func (p Postgre) CreateUserInDB(user model.UnregUser) string {
+func (p *Postgre) CreateUserInDB(user model.UnregUser) string {
 	sqlStatment := `INSERT INTO commodities (cname, price, quantity) VALUES ($1, $2, $3) RETURNING cid`
 	var id string
 	err := p.db.QueryRow(sqlStatment, user.Name).Scan(&id)
@@ -153,7 +153,7 @@ func (p Postgre) CreateUserInDB(user model.UnregUser) string {
 	fmt.Printf("Inserted a single record %v", id)
 	return id
 }
-func (p Postgre) DeleteOneUser(userID string) {
+func (p *Postgre) DeleteOneUser(userID string) {
 	sqlStatment := `DELETE FROM users WHERE cid=$1`
 	res, err := p.db.Exec(sqlStatment, userID)
 	if err != nil {
@@ -167,10 +167,10 @@ func (p Postgre) DeleteOneUser(userID string) {
 	fmt.Printf("Total rows/record affected %v", rowsAffected)
 
 }
-func (p Postgre) DeleteALlUsers() int64 {
+func (p *Postgre) DeleteALlUsers() int64 {
 	return 0
 }
-func (p Postgre) GetAllUser() ([]model.UnregUser, error) {
+func (p *Postgre) GetAllUsers() ([]model.UnregUser, error) {
 	var users []model.UnregUser
 	sqlStatment := `SELECT * FROM users`
 	rows, err := p.db.Query(sqlStatment)
@@ -188,7 +188,7 @@ func (p Postgre) GetAllUser() ([]model.UnregUser, error) {
 	}
 	return users, err
 }
-func (p Postgre) GetOneUser(id string) (model.UnregUser, error) {
+func (p *Postgre) GetOneUser(id string) (model.UnregUser, error) {
 	var user model.UnregUser
 	sqlStatment := `SELECT * FROM users WHERE cid=$1`
 	row := p.db.QueryRow(sqlStatment, id)
@@ -205,6 +205,7 @@ func (p Postgre) GetOneUser(id string) (model.UnregUser, error) {
 	}
 	return user, err
 }
-func (p Postgre) AddCommodityToUserBasket() {
+func (p *Postgre) CreateUnregUserInDB() string { return "" }
+func (p *Postgre) AddCommodityToUserBasket(UserID string, CommodityID string) {
 
 }

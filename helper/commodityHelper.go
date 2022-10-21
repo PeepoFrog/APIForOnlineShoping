@@ -166,10 +166,10 @@ func (p *Postgre) DeleteOneCommodity(commodityID string) int64 {
 	fmt.Printf("Total rows/record affected %v", rowsAffected)
 	return rowsAffected
 }
-func (p Postgre) DeleteALlCommodities() int64 {
+func (p *Postgre) DeleteALlCommodities() int64 {
 	return 0
 }
-func (p Postgre) GetAllCommodities() ([]model.Commodity, error) {
+func (p *Postgre) GetAllCommodities() ([]model.Commodity, error) {
 	var commodities []model.Commodity
 	sqlStatment := `SELECT * FROM commodities`
 	rows, err := p.db.Query(sqlStatment)
@@ -187,7 +187,7 @@ func (p Postgre) GetAllCommodities() ([]model.Commodity, error) {
 	}
 	return commodities, err
 }
-func (p Postgre) GetOneCommodity(id string) (model.Commodity, error) {
+func (p *Postgre) GetOneCommodity(id string) (model.Commodity, error) {
 	var commodity model.Commodity
 	sqlStatment := `SELECT * FROM commodities WHERE cid=$1`
 	row := p.db.QueryRow(sqlStatment, id)
@@ -204,7 +204,7 @@ func (p Postgre) GetOneCommodity(id string) (model.Commodity, error) {
 	}
 	return commodity, err
 }
-func (p Postgre) SetPrice(id string, newPrice float64) {
+func (p *Postgre) SetPrice(id string, newPrice float64) {
 	sqlStatment := `UPDATE commodities SET price=$2 WHERE cid=$1`
 	res, err := p.db.Exec(sqlStatment, id, newPrice)
 	if err != nil {
@@ -218,7 +218,7 @@ func (p Postgre) SetPrice(id string, newPrice float64) {
 	fmt.Printf("Total rows/record affected %v", rowsAffected)
 
 }
-func (p Postgre) SetQuantity(id string, newQuantity int) {
+func (p *Postgre) SetQuantity(id string, newQuantity int) {
 	sqlStatment := `UPDATE commodities SET quantity=$2 WHERE cid=$1`
 	res, err := p.db.Exec(sqlStatment, id, newQuantity)
 	if err != nil {

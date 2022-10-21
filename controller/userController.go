@@ -36,7 +36,10 @@ func (c *UserController) CreateUnregUser(w http.ResponseWriter, r *http.Request)
 func (c *UserController) GetAllUsers(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/x-www-form-urlencode")
 	//users := helper.GetAllUsers()
-	users := c.repository.GetAllUsers()
+	users, err := c.repository.GetAllUsers()
+	if err != nil {
+		json.NewEncoder(w).Encode(users)
+	}
 	json.NewEncoder(w).Encode(users)
 
 }
