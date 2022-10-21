@@ -14,7 +14,7 @@ func Router() *mux.Router {
 	_ = mongo
 	postgres := helper.NewPostgre()
 
-	userController := controller.NewUserRepository(mongo)
+	userController := controller.NewUserRepository(postgres)
 	commodityController := controller.NewCommodityRepository(mongo)
 	postgreCommodityComtroller := controller.NewCommodityRepository(postgres)
 

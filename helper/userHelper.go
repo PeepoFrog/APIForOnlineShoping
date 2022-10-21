@@ -190,7 +190,7 @@ func (p *Postgre) GetAllUsers() ([]model.UnregUser, error) {
 }
 func (p *Postgre) GetOneUser(id string) (model.UnregUser, error) {
 	var user model.UnregUser
-	sqlStatment := `SELECT * FROM users WHERE cid=$1`
+	sqlStatment := `SELECT * FROM users WHERE uid=$1`
 	row := p.db.QueryRow(sqlStatment, id)
 	err := row.Scan(&user.ID, &user.Name)
 	switch err {
