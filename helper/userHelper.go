@@ -70,7 +70,7 @@ func (m *Mongo) GetAllUsers() ([]model.UnregUser, error) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	var users []primitive.M
+
 	var modelUsers []model.UnregUser
 	for cursor.Next(context.Background()) {
 		var user bson.M
@@ -82,7 +82,7 @@ func (m *Mongo) GetAllUsers() ([]model.UnregUser, error) {
 		bites, _ := bson.Marshal(user)
 		bson.Unmarshal(bites, &modelUser)
 		modelUsers = append(modelUsers, modelUser)
-		users = append(users, user)
+
 	}
 	defer cursor.Close(context.Background())
 	return modelUsers, err
