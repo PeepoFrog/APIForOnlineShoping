@@ -17,7 +17,6 @@ func Router() *mux.Router {
 	userController := controller.NewUserRepository(mongo)
 	commodityController := controller.NewCommodityRepository(mongo)
 	postgreCommodityComtroller := controller.NewCommodityRepository(postgres)
-	router.HandleFunc("/api/usertest", userController.AddUser).Methods("POST")
 
 	//
 	//
@@ -33,7 +32,6 @@ func Router() *mux.Router {
 	//
 	// testing
 	router.HandleFunc("/test/cookie", userController.GetSetCoockies).Methods("GET")
-	router.HandleFunc("/test/{userID}&{itemID}", helper.Testing).Methods("GET")
 	router.HandleFunc("/test", postgreCommodityComtroller.GetAllCommodities).Methods("GET")
 	router.HandleFunc("/test{id}&{price}", postgreCommodityComtroller.GetAllCommodities).Methods("GET")
 

@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type UserController struct {
@@ -19,13 +18,6 @@ type UserController struct {
 
 func NewUserRepository(repository helper.UserRepository) *UserController {
 	return &UserController{repository: repository}
-}
-
-func (c *UserController) AddUser(w http.ResponseWriter, r *http.Request) {
-	var user model.UnregUser
-
-	_ = json.NewDecoder(r.Body).Decode(&user) //check what instade of this var
-	c.repository.AddUser(user)
 }
 
 // gittest
@@ -52,8 +44,8 @@ func (c *UserController) GetOneUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/x-www-form-urlencode")
 	params := mux.Vars(r)
 	//searchedUser := helper.GetOneUser(params["id"])
-	searchedUser := c.repository.GetOneUser(params["id"])
-	if searchedUser == nil {
+	searchedUser, err := c.repository.GetOneUser(params["id"])
+	if err != nil {
 		json.NewEncoder(w).Encode("No user with id: " + params["id"])
 		return
 	}
@@ -91,10 +83,10 @@ func (c *UserController) SetCookie(w http.ResponseWriter, r *http.Request) *http
 
 	//user := CreateUnregUserInDB()
 	// user := UserRepository.CreateUnregUserInDB(NewMongo())
-	user := c.repository.CreateUnregUserInDB()
-	id := user.InsertedID.(primitive.ObjectID).String()
-	fmt.Println(id)
-	cookie := http.Cookie{Name: "id", Value: id, Expires: expiration}
+	userID := c.repository.CreateUnregUserInDB()
+
+	fmt.Println(userID)
+	cookie := http.Cookie{Name: "id", Value: userID, Expires: expiration}
 	http.SetCookie(w, &cookie)
 	return &cookie
 }

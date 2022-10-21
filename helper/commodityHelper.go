@@ -57,13 +57,11 @@ func (m *Mongo) DeleteALlCommodities() int64 {
 	return deleteResult.DeletedCount
 }
 
-// return  was []primitive.M
 func (m *Mongo) GetAllCommodities() ([]model.Commodity, error) {
 	cursor, err := collection.Find(context.Background(), bson.D{{}})
 	if err != nil {
 		log.Fatal(err)
 	}
-	var commodities []primitive.M
 	var commoditiesStruct []model.Commodity
 	for cursor.Next(context.Background()) {
 		var comodity bson.M
@@ -79,14 +77,12 @@ func (m *Mongo) GetAllCommodities() ([]model.Commodity, error) {
 		bites, _ := bson.Marshal(comodity)
 		bson.Unmarshal(bites, &scomodity)
 		commoditiesStruct = append(commoditiesStruct, scomodity)
-		commodities = append(commodities, comodity)
+
 	}
 
 	defer cursor.Close(context.Background())
 
 	//return commodities
-	fmt.Println(commodities, " <=Commodities")
-	fmt.Println(commoditiesStruct, " <=Commodities struct ")
 	return commoditiesStruct, err
 }
 
@@ -101,7 +97,6 @@ func (m *Mongo) GetOneCommodity(comodityID string) (model.Commodity, error) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	var commodities []primitive.M
 	var rcommodity bson.M
 	for cursor.Next(context.Background()) {
 		var comodity bson.M
@@ -112,8 +107,6 @@ func (m *Mongo) GetOneCommodity(comodityID string) (model.Commodity, error) {
 			log.Fatal(err)
 		}
 		rcommodity = comodity
-		commodities = append(commodities, comodity)
-		//fmt.Println(commodities)
 	}
 
 	defer cursor.Close(context.Background())
@@ -149,30 +142,8 @@ func (m *Mongo) SetQuantity(commodityID string, newQuantity int) {
 
 // --- P O S T G R E - DB ---
 //
-//	func createConnection() *sql.DB {
-//		// load .env file
-//		err := godotenv.Load(".env")
-//		if err != nil {
-//			log.Fatalf("Error loading .env file")
-//		}
-//		// Open the connection
-//		db, err := sql.Open("postgres", os.Getenv("POSTGRES_URL"))
-//		if err != nil {
-//			panic(err)
-//		}
-//		// check the connection
-//		err = db.Ping()
-//		if err != nil {
-//			panic(err)
-//		}
-//		fmt.Println("Successfully connected!")
-//		// return the connection
-//		return db
-//	}
-func (p *Postgre) InsertComodity(commodity model.Commodity) string {
 
-	// db := createConnection()
-	// defer db.Close()
+func (p *Postgre) InsertComodity(commodity model.Commodity) string {
 	sqlStatment := `INSERT INTO commodities (cname, price, quantity) VALUES ($1, $2, $3) RETURNING cid`
 	var id string
 	err := p.db.QueryRow(sqlStatment, commodity.Name, commodity.Price, commodity.Quantity).Scan(&id)
@@ -183,8 +154,6 @@ func (p *Postgre) InsertComodity(commodity model.Commodity) string {
 	return id
 }
 func (p *Postgre) DeleteOneCommodity(commodityID string) int64 {
-	// db := createConnection()
-	// defer db.Close()
 	sqlStatment := `DELETE FROM commodities WHERE cid=$1`
 	res, err := p.db.Exec(sqlStatment, commodityID)
 	if err != nil {
@@ -201,8 +170,6 @@ func (p Postgre) DeleteALlCommodities() int64 {
 	return 0
 }
 func (p Postgre) GetAllCommodities() ([]model.Commodity, error) {
-	// db := createConnection()
-	// defer db.Close()
 	var commodities []model.Commodity
 	sqlStatment := `SELECT * FROM commodities`
 	rows, err := p.db.Query(sqlStatment)
@@ -221,8 +188,6 @@ func (p Postgre) GetAllCommodities() ([]model.Commodity, error) {
 	return commodities, err
 }
 func (p Postgre) GetOneCommodity(id string) (model.Commodity, error) {
-	// db := createConnection()
-	// defer db.Close()
 	var commodity model.Commodity
 	sqlStatment := `SELECT * FROM commodities WHERE cid=$1`
 	row := p.db.QueryRow(sqlStatment, id)
@@ -240,8 +205,6 @@ func (p Postgre) GetOneCommodity(id string) (model.Commodity, error) {
 	return commodity, err
 }
 func (p Postgre) SetPrice(id string, newPrice float64) {
-	// db := createConnection()
-	// defer db.Close()
 	sqlStatment := `UPDATE commodities SET price=$2 WHERE cid=$1`
 	res, err := p.db.Exec(sqlStatment, id, newPrice)
 	if err != nil {
@@ -256,8 +219,6 @@ func (p Postgre) SetPrice(id string, newPrice float64) {
 
 }
 func (p Postgre) SetQuantity(id string, newQuantity int) {
-	// db := createConnection()
-	// defer db.Close()
 	sqlStatment := `UPDATE commodities SET quantity=$2 WHERE cid=$1`
 	res, err := p.db.Exec(sqlStatment, id, newQuantity)
 	if err != nil {

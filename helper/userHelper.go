@@ -2,52 +2,47 @@ package helper
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"internetshop/model"
 	"log"
-	"net/http"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 //var basket []primitive.M
 
 type UserRepository interface {
-	AddUser(user model.UnregUser)
-	CreateUserInDB(user model.UnregUser) *mongo.InsertOneResult
-	CreateUnregUserInDB() *mongo.InsertOneResult
+	CreateUserInDB(user model.UnregUser) string
+	CreateUnregUserInDB() string
 	DeleteOneUser(userID string)
 	DeleteALlUsers() int64
-	GetAllUsers() []primitive.M
-	GetOneUser(UserID string) bson.M
+	GetAllUsers() []model.UnregUser
+	GetOneUser(UserID string) (model.UnregUser, error)
 	AddCommodityToUserBasket(UserID string, CommodityID string)
 }
 
-func (m *Mongo) AddUser(user model.UnregUser) {
-
-}
-func (p *Postgre) AddUser(user model.UnregUser) {
-
-}
-func (m *Mongo) CreateUserInDB(user model.UnregUser) *mongo.InsertOneResult {
+func (m *Mongo) CreateUserInDB(user model.UnregUser) string {
 	insertedUser, err := userCollection.InsertOne(context.Background(), user)
 	if err != nil {
 		log.Fatal(err)
 	}
+	id := insertedUser.InsertedID
 	fmt.Println("User with id ", insertedUser.InsertedID, " was added")
-	return insertedUser
+	return id.(primitive.ObjectID).Hex()
+
 }
 
-func (m *Mongo) CreateUnregUserInDB() *mongo.InsertOneResult {
+func (m *Mongo) CreateUnregUserInDB() string {
 	var user model.UnregUser
 	insertedUser, err := userCollection.InsertOne(context.Background(), user)
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("User with id ", insertedUser.InsertedID, " was added")
-	return insertedUser
+	id := insertedUser.InsertedID
+	fmt.Println("User with id ", id, " was added")
+	return id.(primitive.ObjectID).Hex()
 }
 func (m *Mongo) DeleteOneUser(userID string) {
 	id, err := primitive.ObjectIDFromHex(userID)
@@ -70,26 +65,29 @@ func (m *Mongo) DeleteALlUsers() int64 {
 	fmt.Println("Number of users was deleted ", deleteResult.DeletedCount)
 	return deleteResult.DeletedCount
 }
-func (m *Mongo) GetAllUsers() []primitive.M {
+func (m *Mongo) GetAllUsers() []model.UnregUser {
 	cursor, err := userCollection.Find(context.Background(), bson.D{{}})
 	if err != nil {
 		log.Fatal(err)
 	}
 	var users []primitive.M
+	var modelUsers []model.UnregUser
 	for cursor.Next(context.Background()) {
 		var user bson.M
-
+		var modelUser model.UnregUser
 		err := cursor.Decode(&user)
 		if err != nil {
 			log.Fatal(err)
 		}
-		fmt.Println()
+		bites, _ := bson.Marshal(user)
+		bson.Unmarshal(bites, &modelUser)
+		modelUsers = append(modelUsers, modelUser)
 		users = append(users, user)
 	}
 	defer cursor.Close(context.Background())
-	return users
+	return modelUsers
 }
-func (m *Mongo) GetOneUser(UserID string) bson.M {
+func (m *Mongo) GetOneUser(UserID string) (model.UnregUser, error) {
 	id, err := primitive.ObjectIDFromHex(UserID)
 	if err != nil {
 		fmt.Println(err)
@@ -113,10 +111,12 @@ func (m *Mongo) GetOneUser(UserID string) bson.M {
 		fmt.Println(user)
 
 	}
-
+	bites, _ := bson.Marshal(ruser)
+	var suser model.UnregUser
+	bson.Unmarshal(bites, &suser)
 	defer cursor.Close(context.Background())
-	//returning regular user and usen in []primitive array
-	return ruser
+
+	return suser, err
 }
 func (m *Mongo) AddCommodityToUserBasket(UserID string, CommodityID string) {
 	// params := mux.Vars(r)
@@ -131,18 +131,6 @@ func (m *Mongo) AddCommodityToUserBasket(UserID string, CommodityID string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	//----add separate commodity object to basket-----
-	// iid, err := primitive.ObjectIDFromHex(CommodityID)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// ifilter := bson.M{"_id": iid}
-	// var item model.Commodity
-	// err = collection.FindOne(context.TODO(), ifilter).Decode(&item)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// fmt.Printf("type is %T \nobject = %v  \n \n", item, item)
 	fmt.Printf("type is %T \nobject = %v  \n \n", user, user)
 	user.Basket.CommodityArray = append(user.Basket.CommodityArray, CommodityID)
 	fmt.Printf("type is %T \nobject = %v  \n \n", user, user)
@@ -153,6 +141,70 @@ func (m *Mongo) AddCommodityToUserBasket(UserID string, CommodityID string) {
 	fmt.Println(updateResult)
 
 }
-func Testing(w http.ResponseWriter, r *http.Request) {
+
+// --- P O S T G R E---DB ---
+func (p Postgre) CreateUserInDB(user model.UnregUser) string {
+	sqlStatment := `INSERT INTO commodities (cname, price, quantity) VALUES ($1, $2, $3) RETURNING cid`
+	var id string
+	err := p.db.QueryRow(sqlStatment, user.Name).Scan(&id)
+	if err != nil {
+		log.Fatalf("Unable to execute the query. %v", err)
+	}
+	fmt.Printf("Inserted a single record %v", id)
+	return id
+}
+func (p Postgre) DeleteOneUser(userID string) {
+	sqlStatment := `DELETE FROM users WHERE cid=$1`
+	res, err := p.db.Exec(sqlStatment, userID)
+	if err != nil {
+		log.Fatalf("Unable to execute the query. %v", err)
+	}
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		log.Fatalf("Error while checking the affected rows. %v", err)
+	}
+
+	fmt.Printf("Total rows/record affected %v", rowsAffected)
+
+}
+func (p Postgre) DeleteALlUsers() int64 {
+	return 0
+}
+func (p Postgre) GetAllUser() ([]model.UnregUser, error) {
+	var users []model.UnregUser
+	sqlStatment := `SELECT * FROM users`
+	rows, err := p.db.Query(sqlStatment)
+	if err != nil {
+		log.Fatalf("Unable to execute the query. %v", err)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var user model.UnregUser
+		err := rows.Scan(&user.ID, &user.Name)
+		if err != nil {
+			log.Fatalf("Unable to scan the row. %v", err)
+		}
+		users = append(users, user)
+	}
+	return users, err
+}
+func (p Postgre) GetOneUser(id string) (model.UnregUser, error) {
+	var user model.UnregUser
+	sqlStatment := `SELECT * FROM users WHERE cid=$1`
+	row := p.db.QueryRow(sqlStatment, id)
+	err := row.Scan(&user.ID, &user.Name)
+	switch err {
+	case sql.ErrNoRows:
+		fmt.Println("No rows were returned!")
+		return user, nil
+	case nil:
+		return user, nil
+	default:
+		log.Fatalf("Unable to scan the row. %v", err)
+
+	}
+	return user, err
+}
+func (p Postgre) AddCommodityToUserBasket() {
 
 }
