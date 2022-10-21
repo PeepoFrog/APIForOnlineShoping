@@ -144,7 +144,7 @@ func (m *Mongo) AddCommodityToUserBasket(UserID string, CommodityID string) {
 
 // --- P O S T G R E---DB ---
 func (p *Postgre) CreateUserInDB(user model.UnregUser) string {
-	sqlStatment := `INSERT INTO commodities (cname, price, quantity) VALUES ($1, $2, $3) RETURNING cid`
+	sqlStatment := `INSERT INTO users (uname) VALUES ($1) RETURNING uid`
 	var id string
 	err := p.db.QueryRow(sqlStatment, user.Name).Scan(&id)
 	if err != nil {
