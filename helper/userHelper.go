@@ -207,5 +207,15 @@ func (p *Postgre) GetOneUser(id string) (model.UnregUser, error) {
 }
 func (p *Postgre) CreateUnregUserInDB() string { return "" }
 func (p *Postgre) AddCommodityToUserBasket(UserID string, CommodityID string) {
-
+	// 	insert into basket (cid,uid)
+	// values ('230dd75a-893c-4143-bf36-57a6f2848be8','7c8814b8-9f45-4172-99cd-20c2b58c7461' )
+	// on CONFLICT (cid , uid) do UPDATE
+	// set quantity = basket.quantity +1 ;
+	sqlStatment := `INSERT INTO basket (cid, uid) VALUES ($1, $2) on CONFLICT (cid , uid) do UPDATE set quantity = basket.quantity +1 RETURNING bid `
+	var id string
+	err := p.db.QueryRow(sqlStatment, CommodityID, UserID).Scan(&id)
+	if err != nil {
+		log.Fatalf("Unable to execute the query. %v", err)
+	}
+	fmt.Printf("Inserted a single record %v", id)
 }
